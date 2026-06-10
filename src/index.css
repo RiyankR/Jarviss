@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cyan: #00d4ff;
+  --blue: #0066cc;
+  --bg: #030712;
+  --panel: rgba(0, 20, 50, 0.65);
+  --border: rgba(0, 212, 255, 0.15);
+  --text: #c8e0f0;
+  --muted: #4a6080;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 212, 255, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 2px;
+}
+
+body {
+  background-color: #030712;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glass {
+  background: rgba(0, 20, 50, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 12px;
+}
+
+.glass-dark {
+  background: rgba(3, 7, 18, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  border-radius: 12px;
+}
+
+.glass-hover {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.glass-hover:hover {
+  border-color: rgba(0, 212, 255, 0.35);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.08);
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+.glow-border {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.25), inset 0 0 15px rgba(0, 212, 255, 0.05);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0066cc, #00d4ff);
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.35);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--cyan);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-ghost:hover {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.5);
+}
+
+.btn-danger {
+  background: transparent;
+  color: #ef4444;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.85rem;
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid transparent;
+}
+.nav-item:hover {
+  background: rgba(0, 212, 255, 0.08);
+  color: var(--cyan);
+}
+.nav-item.active {
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--cyan);
+  border-color: rgba(0, 212, 255, 0.2);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.section-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+.label {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.input-jarvis {
+  background: rgba(0, 20, 50, 0.6);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-jarvis:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+}
+.input-jarvis::placeholder { color: var(--muted); }
+
+textarea.input-jarvis {
+  resize: vertical;
+  min-height: 80px;
+}
+
+select.input-jarvis { cursor: pointer; }
+select.input-jarvis option {
+  background: #050e1a;
+  color: var(--text);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.6); }
+}
+
+.timer-ring {
+  filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, rgba(0, 102, 204, 0.4), rgba(0, 212, 255, 0.2));
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 12px 12px 4px 12px;
+}
+
+.chat-bubble-ai {
+  background: rgba(0, 20, 50, 0.7);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 12px 12px 12px 4px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
