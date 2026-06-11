@@ -120,10 +120,10 @@ export default function Dashboard({ userId, profile, onNavigate }: Props) {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsCards.map(card => (
-          <div key={card.label} className={`glass glass-hover p-4 bg-gradient-to-br ${card.color} border ${card.border}`}>
+        {statsCards.map((card, i) => (
+          <div key={card.label} className={`glass glass-hover p-4 bg-gradient-to-br ${card.color} border ${card.border} stagger-item`} style={{ animationDelay: `${i * 0.08}s` }}>
             <div className="flex items-start justify-between mb-3">
-              <div className="p-2 rounded-lg bg-white/5">{card.icon}</div>
+              <div className="p-2 rounded-lg bg-white/5 animate-pulse" style={{ animationDuration: '3s' }}>{card.icon}</div>
             </div>
             <div className="text-2xl font-bold text-white" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
               {card.value}

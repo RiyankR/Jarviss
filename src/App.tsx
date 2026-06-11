@@ -9,6 +9,7 @@ import Tasks from './pages/Tasks';
 import Exams from './pages/Exams';
 import StudyTimer from './pages/StudyTimer';
 import Notes from './pages/Notes';
+import Calendar from './pages/Calendar';
 import AIChat from './pages/AIChat';
 import ProfilePage from './pages/Profile';
 
@@ -112,6 +113,7 @@ export default function App() {
       {page === 'exams' && <Exams userId={userId!} />}
       {page === 'timer' && <StudyTimer userId={userId!} onSessionComplete={handleSessionComplete} />}
       {page === 'notes' && <Notes userId={userId!} />}
+      {page === 'calendar' && <Calendar userId={userId!} />}
       {page === 'chat' && <AIChat />}
       {page === 'profile' && <ProfilePage profile={profile} onUpdate={setProfile} onSignOut={handleSignOut} />}
     </Layout>

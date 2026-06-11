@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Timer, FileText, MessageSquare, User, Menu, X, Zap, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Timer, FileText, Calendar, MessageSquare, User, Menu, X, Zap, LogOut } from 'lucide-react';
 import type { Page } from '../types';
 
 interface Props {
@@ -18,6 +18,7 @@ const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
   { id: 'exams', label: 'Exams', icon: <BookOpen size={18} /> },
   { id: 'timer', label: 'Study Timer', icon: <Timer size={18} /> },
   { id: 'notes', label: 'Notes', icon: <FileText size={18} /> },
+  { id: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
   { id: 'chat', label: 'AI Assistant', icon: <MessageSquare size={18} /> },
   { id: 'profile', label: 'Profile', icon: <User size={18} /> },
 ];
@@ -94,7 +95,8 @@ export default function Layout({ currentPage, onNavigate, children, profileName,
   );
 
   return (
-    <div className="min-h-screen bg-[#030712] bg-grid flex">
+    <div className="min-h-screen bg-[#030712] bg-grid flex relative">
+      <div className="gradient-mesh" />
       <aside className="hidden md:flex flex-col w-60 min-h-screen glass-dark border-r border-[rgba(0,212,255,0.1)] flex-shrink-0 fixed top-0 left-0 h-full z-30">
         <Sidebar />
       </aside>

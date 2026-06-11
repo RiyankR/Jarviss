@@ -1,4 +1,4 @@
-export type Page = 'dashboard' | 'timetable' | 'tasks' | 'exams' | 'timer' | 'notes' | 'chat' | 'profile';
+export type Page = 'dashboard' | 'timetable' | 'tasks' | 'exams' | 'timer' | 'notes' | 'calendar' | 'chat' | 'profile';
 
 export interface Profile {
   id: string;
@@ -63,4 +63,17 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+}
+
+export interface Event {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  event_date: string;
+  event_time: string | null;
+  color: string;
+  location: string;
+  reminder: boolean;
+  created_at: string;
 }
