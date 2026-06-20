@@ -10,6 +10,7 @@ import Exams from './pages/Exams';
 import StudyTimer from './pages/StudyTimer';
 import Notes from './pages/Notes';
 import Calendar from './pages/Calendar';
+import Health from './pages/Health';
 import AIChat from './pages/AIChat';
 import ProfilePage from './pages/Profile';
 
@@ -114,6 +115,7 @@ export default function App() {
       {page === 'timer' && <StudyTimer userId={userId!} onSessionComplete={handleSessionComplete} />}
       {page === 'notes' && <Notes userId={userId!} />}
       {page === 'calendar' && <Calendar userId={userId!} />}
+      {page === 'health' && <Health userId={userId!} />}
       {page === 'chat' && <AIChat />}
       {page === 'profile' && <ProfilePage profile={profile} onUpdate={setProfile} onSignOut={handleSignOut} />}
     </Layout>
