@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Timer, FileText, Calendar, Heart, MessageSquare, User, Menu, X, Zap, LogOut } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, CheckSquare, BookOpen, Timer, FileText, Calendar, Heart, Users, MessageSquare, User, Menu, X, Zap, LogOut } from 'lucide-react';
 import type { Page } from '../types';
 
 interface Props {
@@ -20,6 +20,7 @@ const navItems: { id: Page; label: string; icon: React.ReactNode }[] = [
   { id: 'notes', label: 'Notes', icon: <FileText size={18} /> },
   { id: 'calendar', label: 'Calendar', icon: <Calendar size={18} /> },
   { id: 'health', label: 'Health', icon: <Heart size={18} /> },
+  { id: 'family', label: 'Family', icon: <Users size={18} /> },
   { id: 'chat', label: 'AI Assistant', icon: <MessageSquare size={18} /> },
   { id: 'profile', label: 'Profile', icon: <User size={18} /> },
 ];

@@ -1,4 +1,4 @@
-export type Page = 'dashboard' | 'timetable' | 'tasks' | 'exams' | 'timer' | 'notes' | 'calendar' | 'health' | 'chat' | 'profile';
+export type Page = 'dashboard' | 'timetable' | 'tasks' | 'exams' | 'timer' | 'notes' | 'calendar' | 'health' | 'family' | 'chat' | 'profile';
 
 export interface Profile {
   id: string;
@@ -156,5 +156,72 @@ export interface WorkoutReminder {
   days_of_week: number[];
   is_active: boolean;
   message: string | null;
+  created_at: string;
+}
+
+export interface ParentLink {
+  id: string;
+  parent_user_id: string;
+  student_user_id: string;
+  link_code: string;
+  is_active: boolean;
+  relationship: string;
+  approved_at: string | null;
+  created_at: string;
+}
+
+export interface LinkCode {
+  id: string;
+  student_user_id: string;
+  code: string;
+  expires_at: string | null;
+  used_at: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Incentive {
+  id: string;
+  parent_user_id: string;
+  student_user_id: string;
+  title: string;
+  description: string;
+  incentive_type: 'message' | 'experience' | 'activity' | 'privilege';
+  goal_type: 'task_complete' | 'exam_score' | 'study_hours' | 'streak' | 'manual';
+  goal_target: number | null;
+  goal_progress: number;
+  status: 'pending' | 'in_progress' | 'unlocked' | 'redeemed';
+  unlocked_at: string | null;
+  redeemed_at: string | null;
+  message_content: string;
+  linked_task_id: string | null;
+  linked_exam_id: string | null;
+  linked_timer_sessions: number;
+  created_at: string;
+}
+
+export interface ParentNotification {
+  id: string;
+  parent_user_id: string;
+  student_user_id: string;
+  notification_type: string;
+  title: string;
+  message: string;
+  related_entity_id: string | null;
+  related_entity_type: string | null;
+  is_read: boolean;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface StudentNotification {
+  id: string;
+  student_user_id: string;
+  notification_type: string;
+  title: string;
+  message: string;
+  related_incentive_id: string | null;
+  is_read: boolean;
+  read_at: string | null;
   created_at: string;
 }

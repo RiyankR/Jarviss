@@ -11,6 +11,7 @@ import StudyTimer from './pages/StudyTimer';
 import Notes from './pages/Notes';
 import Calendar from './pages/Calendar';
 import Health from './pages/Health';
+import Family from './pages/Family';
 import AIChat from './pages/AIChat';
 import ProfilePage from './pages/Profile';
 
@@ -116,6 +117,7 @@ export default function App() {
       {page === 'notes' && <Notes userId={userId!} />}
       {page === 'calendar' && <Calendar userId={userId!} />}
       {page === 'health' && <Health userId={userId!} />}
+      {page === 'family' && <Family userId={userId!} />}
       {page === 'chat' && <AIChat />}
       {page === 'profile' && <ProfilePage profile={profile} onUpdate={setProfile} onSignOut={handleSignOut} />}
     </Layout>
