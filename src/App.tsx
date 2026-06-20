@@ -26,9 +26,13 @@ export default function App() {
   const loadProfile = useCallback(async (uid: string) => {
     let { data: prof } = await supabase.from('profiles').select('*').eq('user_id', uid).maybeSingle();
     if (!prof) {
+      // Get name from user metadata (OAuth users)
+      const { data: { user } } = await supabase.auth.getUser();
+      const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Student';
+      const avatarColor = user?.user_metadata?.avatar_url ? '#00d4ff' : '#00d4ff';
       const { data: newProf } = await supabase
         .from('profiles')
-        .insert({ user_id: uid, name: 'Student', avatar_color: '#00d4ff', study_streak: 0, total_study_minutes: 0 })
+        .insert({ user_id: uid, name: userName, avatar_color: avatarColor, study_streak: 0, total_study_minutes: 0 })
         .select()
         .single();
       prof = newProf;
