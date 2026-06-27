@@ -1,35 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, getCurrentUser, type AuthUser } from './lib/supabase';
-import type { Page, Profile } from './types';
+import type { Profile } from './types';
 import Layout from './components/Layout';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
-import Timetable from './pages/Timetable';
-import Tasks from './pages/Tasks';
-import Exams from './pages/Exams';
-import StudyTimer from './pages/StudyTimer';
-import Notes from './pages/Notes';
-import Calendar from './pages/Calendar';
-import Health from './pages/Health';
-import Family from './pages/Family';
 import AIChat from './pages/AIChat';
-import ProfilePage from './pages/Profile';
 
 export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [page, setPage] = useState<Page>('dashboard');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'chat'>('dashboard');
 
   const userId = user?.id ?? null;
 
   const loadProfile = useCallback(async (uid: string) => {
     let { data: prof } = await supabase.from('profiles').select('*').eq('user_id', uid).maybeSingle();
     if (!prof) {
-      // Get name from user metadata (OAuth users)
       const { data: { user } } = await supabase.auth.getUser();
       const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Student';
-      const avatarColor = user?.user_metadata?.avatar_url ? '#00d4ff' : '#00d4ff';
+      const avatarColor = '#a855f7';
       const { data: newProf } = await supabase
         .from('profiles')
         .insert({ user_id: uid, name: userName, avatar_color: avatarColor, study_streak: 0, total_study_minutes: 0 })
@@ -70,30 +60,15 @@ export default function App() {
     setProfile(null);
   }
 
-  async function handleSessionComplete(minutes: number) {
-    if (!profile || !userId) return;
-    const today = new Date().toISOString().split('T')[0];
-    const lastDate = profile.last_study_date;
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const newStreak = lastDate === today ? profile.study_streak : lastDate === yesterday ? profile.study_streak + 1 : 1;
-
-    const { data } = await supabase
-      .from('profiles')
-      .update({ total_study_minutes: profile.total_study_minutes + minutes, study_streak: newStreak, last_study_date: today, updated_at: new Date().toISOString() })
-      .eq('id', profile.id)
-      .select()
-      .maybeSingle();
-    if (data) setProfile(data);
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#030712] bg-grid flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0510] bg-grid flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-full border-2 border-[#00d4ff] flex items-center justify-center mx-auto">
-            <div className="w-8 h-8 rounded-full border border-[#00d4ff]/50 animate-ping" />
+          <div className="w-20 h-20 rounded-full border-2 border-purple-400 flex items-center justify-center mx-auto relative">
+            <div className="absolute inset-0 rounded-full border border-purple-400/20 scale-125 animate-ping" />
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-indigo-600/30 animate-pulse rounded-full" />
           </div>
-          <div className="text-[#00d4ff] tracking-[0.3em] uppercase text-sm animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <div className="text-purple-300 tracking-[0.3em] uppercase text-sm animate-pulse" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Initializing JARVIS...
           </div>
         </div>
@@ -107,23 +82,19 @@ export default function App() {
 
   return (
     <Layout
-      currentPage={page}
-      onNavigate={setPage}
+      currentPage={currentPage}
+      onNavigate={setCurrentPage as (p: 'dashboard' | 'chat') => void}
       profileName={profile?.name ?? 'Student'}
-      avatarColor={profile?.avatar_color ?? '#00d4ff'}
+      avatarColor={profile?.avatar_color ?? '#a855f7'}
       onSignOut={handleSignOut}
     >
-      {page === 'dashboard' && <Dashboard userId={userId!} profile={profile} onNavigate={setPage as (p: 'timetable' | 'tasks' | 'exams' | 'timer') => void} />}
-      {page === 'timetable' && <Timetable userId={userId!} />}
-      {page === 'tasks' && <Tasks userId={userId!} />}
-      {page === 'exams' && <Exams userId={userId!} />}
-      {page === 'timer' && <StudyTimer userId={userId!} onSessionComplete={handleSessionComplete} />}
-      {page === 'notes' && <Notes userId={userId!} />}
-      {page === 'calendar' && <Calendar userId={userId!} />}
-      {page === 'health' && <Health userId={userId!} />}
-      {page === 'family' && <Family userId={userId!} />}
-      {page === 'chat' && <AIChat />}
-      {page === 'profile' && <ProfilePage profile={profile} onUpdate={setProfile} onSignOut={handleSignOut} />}
+      {currentPage === 'dashboard' && (
+        <Dashboard
+          userId={userId!}
+          profile={profile}
+        />
+      )}
+      {currentPage === 'chat' && <AIChat />}
     </Layout>
   );
 }

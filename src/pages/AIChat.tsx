@@ -373,7 +373,7 @@ export default function AIChat() {
         {/* Suggestions */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
           {suggestions.map(s => (
-            <button key={s} onClick={() => sendMessage(s)} className="tag cursor-pointer hover:bg-purple-500/20">
+            <button key={s} onClick={() => sendMessage(s)} className="tag cursor-pointer hover:bg-purple-500/20 whitespace-nowrap">
               {s}
             </button>
           ))}

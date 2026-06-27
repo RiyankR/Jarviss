@@ -540,23 +540,35 @@ select.input-jarvis option {
   pointer-events: none;
   z-index: 0;
   animation: aurora-drift linear infinite;
+  opacity: 0;
 }
 
 @keyframes aurora-drift {
   0% {
-    transform: translateY(100vh) translateX(0);
+    transform: translateY(100vh) translateX(0) scale(0.5);
     opacity: 0;
   }
-  10% {
-    opacity: 0.6;
+  15% {
+    opacity: 0.5;
+    transform: translateY(80vh) translateX(10px) scale(1);
   }
-  90% {
-    opacity: 0.6;
+  85% {
+    opacity: 0.5;
+    transform: translateY(10vh) translateX(-20px) scale(1);
   }
   100% {
-    transform: translateY(-20vh) translateX(50px);
+    transform: translateY(-10vh) translateX(30px) scale(0.5);
     opacity: 0;
   }
+}
+
+/* Hide scrollbar for section nav */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Neon glow for elements */
