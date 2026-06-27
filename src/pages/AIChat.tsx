@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Mic, MicOff, Bot, User, RotateCcw } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Send, Mic, MicOff, Bot, User, RotateCcw, Sparkles } from 'lucide-react';
 import type { ChatMessage } from '../types';
 
 const RESPONSES: { patterns: RegExp[]; replies: string[] }[] = [
@@ -51,6 +51,30 @@ const INIT: ChatMessage = {
   timestamp: new Date(),
 };
 
+// Matrix-style falling characters
+const MATRIX_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
+
+interface MatrixColumn {
+  x: number;
+  y: number;
+  speed: number;
+  chars: string[];
+  opacity: number;
+}
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  opacity: number;
+  hue: number;
+  life: number;
+  maxLife: number;
+}
+
 export default function AIChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([INIT]);
   const [input, setInput] = useState('');
@@ -58,6 +82,169 @@ export default function AIChat() {
   const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<SpeechRecognitionInstance | null>(null);
+  const matrixCanvasRef = useRef<HTMLCanvasElement>(null);
+  const particleCanvasRef = useRef<HTMLCanvasElement>(null);
+  const matrixColumnsRef = useRef<MatrixColumn[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+  const animationRef = useRef<number>(0);
+  const particleIdRef = useRef(0);
+
+  // Initialize matrix columns
+  useEffect(() => {
+    const canvas = matrixCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      const cols = Math.floor(canvas.width / 20);
+      matrixColumnsRef.current = Array.from({ length: cols }, (_, i) => ({
+        x: i * 20,
+        y: Math.random() * canvas.height,
+        speed: 2 + Math.random() * 4,
+        chars: Array.from({ length: 20 }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]),
+        opacity: 0.1 + Math.random() * 0.3,
+      }));
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, []);
+
+  // Matrix rain animation
+  const animateMatrix = useCallback(() => {
+    const canvas = matrixCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = 'rgba(5, 5, 15, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = '14px "JetBrains Mono", monospace';
+
+    matrixColumnsRef.current.forEach(col => {
+      col.chars.forEach((char, i) => {
+        const y = col.y + i * 20;
+        const alpha = col.opacity * (1 - i / col.chars.length);
+        ctx.fillStyle = `rgba(139, 92, 246, ${alpha})`;
+        ctx.fillText(char, col.x, y);
+      });
+
+      col.y += col.speed;
+      if (col.y > canvas.height + 400) {
+        col.y = -400;
+        col.chars = col.chars.map(() => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]);
+      }
+
+      // Randomly change characters
+      if (Math.random() < 0.02) {
+        const idx = Math.floor(Math.random() * col.chars.length);
+        col.chars[idx] = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+      }
+    });
+
+    animationRef.current = requestAnimationFrame(animateMatrix);
+  }, []);
+
+  // Particle system
+  const createParticle = useCallback((x: number, y: number): Particle => {
+    const hue = 260 + Math.random() * 60; // Purple range: 260-320
+    return {
+      id: particleIdRef.current++,
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2 - 1,
+      size: 2 + Math.random() * 4,
+      opacity: 0.4 + Math.random() * 0.5,
+      hue,
+      life: 0,
+      maxLife: 100 + Math.random() * 150,
+    };
+  }, []);
+
+  const animateParticles = useCallback(() => {
+    const canvas = particleCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Add new particles from edges (aurora effect)
+    if (particlesRef.current.length < 80 && Math.random() < 0.3) {
+      const edge = Math.random();
+      let x = 0, y = 0;
+      if (edge < 0.5) {
+        x = Math.random() * canvas.width;
+        y = 0;
+      } else {
+        x = 0;
+        y = Math.random() * canvas.height;
+      }
+      particlesRef.current.push(createParticle(x, y));
+    }
+
+    // Update and draw particles
+    particlesRef.current = particlesRef.current.filter(p => {
+      p.life++;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.01; // Gentle upward drift
+      p.opacity = 0.4 * (1 - p.life / p.maxLife);
+
+      // Wrap around
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y > canvas.height) p.y = 0;
+
+      // Draw with glow
+      const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+      gradient.addColorStop(0, `hsla(${p.hue}, 100%, 70%, ${p.opacity})`);
+      gradient.addColorStop(0.5, `hsla(${p.hue}, 100%, 50%, ${p.opacity * 0.5})`);
+      gradient.addColorStop(1, 'transparent');
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, ${p.opacity})`;
+      ctx.fill();
+
+      return p.life < p.maxLife;
+    });
+
+    requestAnimationFrame(animateParticles);
+  }, [createParticle]);
+
+  // Start animations
+  useEffect(() => {
+    animateMatrix();
+    animateParticles();
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, [animateMatrix, animateParticles]);
+
+  // Resize particle canvas
+  useEffect(() => {
+    const canvas = particleCanvasRef.current;
+    if (!canvas) return;
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, []);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, typing]);
 
@@ -91,82 +278,179 @@ export default function AIChat() {
   const suggestions = ['Study tips', 'Pomodoro technique', 'Exam advice', 'Motivate me', 'I feel stressed'];
 
   return (
-    <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-140px)]">
-      <div className="flex items-center justify-between mb-4">
-        <div className="section-title flex items-center gap-2"><MessageSquare size={20} />AI Assistant</div>
-        <button onClick={() => setMessages([INIT])} className="btn-ghost text-sm flex items-center gap-2">
-          <RotateCcw size={14} />Clear
-        </button>
-      </div>
+    <div className="relative max-w-4xl mx-auto flex flex-col h-[calc(100vh-140px)] overflow-hidden">
+      {/* Matrix rain canvas */}
+      <canvas
+        ref={matrixCanvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-30"
+        style={{ zIndex: 0 }}
+      />
 
-      <div className="glass p-4 mb-4 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-2 border-[#00d4ff] flex items-center justify-center flex-shrink-0 animate-pulse">
-          <Bot size={22} className="text-[#00d4ff]" />
-        </div>
-        <div>
-          <div className="font-bold text-[#00d4ff] tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>JARVIS</div>
-          <div className="text-xs text-[#4a6080]">Just A Rather Very Intelligent Study System</div>
-        </div>
-        <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-emerald-400" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Online</span>
-        </div>
-      </div>
+      {/* Aurora particle canvas */}
+      <canvas
+        ref={particleCanvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: 0 }}
+      />
 
-      <div className="glass flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map(msg => (
-          <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {msg.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full border border-[#00d4ff]/40 flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot size={14} className="text-[#00d4ff]" />
-              </div>
-            )}
-            <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
-              <p className="text-[#c8e0f0]">{msg.content}</p>
-              <div className="text-[10px] text-[#4a6080] mt-1.5">
-                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-            {msg.role === 'user' && (
-              <div className="w-7 h-7 rounded-full bg-[#00d4ff]/20 border border-[#00d4ff]/30 flex items-center justify-center flex-shrink-0 mt-1">
-                <User size={14} className="text-[#00d4ff]" />
-              </div>
-            )}
+      {/* Aurora gradient overlays */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          zIndex: 0,
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139, 92, 246, 0.15), transparent),
+            radial-gradient(ellipse 60% 40% at 0% 50%, rgba(168, 85, 247, 0.12), transparent),
+            radial-gradient(ellipse 70% 50% at 100% 80%, rgba(192, 132, 252, 0.1), transparent),
+            radial-gradient(ellipse 40% 30% at 50% 100%, rgba(124, 58, 237, 0.15), transparent)
+          `,
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-4">
+          <div className="section-title-aurora flex items-center gap-2">
+            <Sparkles size={20} className="text-purple-400 animate-pulse" />
+            AI Assistant
           </div>
-        ))}
-        {typing && (
-          <div className="flex gap-3">
-            <div className="w-7 h-7 rounded-full border border-[#00d4ff]/40 flex items-center justify-center">
-              <Bot size={14} className="text-[#00d4ff]" />
-            </div>
-            <div className="chat-bubble-ai px-4 py-3 flex items-center gap-1.5">
-              <div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" />
+          <button onClick={() => setMessages([INIT])} className="btn-ghost-aurora text-sm flex items-center gap-2">
+            <RotateCcw size={14} />Clear
+          </button>
+        </div>
+
+        {/* AI Status Header */}
+        <div className="glass-aurora p-4 mb-4 flex items-center gap-4">
+          <div className="aurora-orb w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 relative">
+            <div className="absolute inset-0 rounded-full animate-spin-slow" style={{
+              background: 'conic-gradient(from 0deg, transparent, rgba(168, 85, 247, 0.5), rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.5), transparent)'
+            }} />
+            <div className="absolute inset-1 rounded-full bg-gradient-to-br from-purple-900/80 to-indigo-900/80" />
+            <Bot size={24} className="relative text-purple-300" />
+            <div className="aurora-ring absolute inset-[-4px] rounded-full border border-purple-500/30 animate-ping" style={{ animationDuration: '2s' }} />
+          </div>
+          <div>
+            <div className="font-bold text-purple-300 tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>JARVIS</div>
+            <div className="text-xs text-purple-400/70">Just A Rather Very Intelligent Study System</div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex gap-0.5">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 h-3 rounded-full"
+                    style={{
+                      background: `linear-gradient(to top, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.8))`,
+                      animation: 'audioBar 0.5s ease-in-out infinite',
+                      animationDelay: `${i * 0.1}s`,
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] text-purple-400/60 uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Neural Active</span>
             </div>
           </div>
-        )}
-        <div ref={bottomRef} />
+          <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs text-emerald-400" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Online</span>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="glass-aurora flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map(msg => (
+            <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'assistant' && (
+                <div className="aurora-avatar w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot size={15} className="text-purple-300" />
+                </div>
+              )}
+              <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'chat-bubble-user-aurora' : 'chat-bubble-ai-aurora'}`}>
+                <p className="text-purple-100">{msg.content}</p>
+                <div className="text-[10px] text-purple-400/50 mt-1.5">
+                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+              {msg.role === 'user' && (
+                <div className="aurora-avatar-user w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <User size={15} className="text-purple-200" />
+                </div>
+              )}
+            </div>
+          ))}
+          {typing && (
+            <div className="flex gap-3">
+              <div className="aurora-avatar w-8 h-8 rounded-full flex items-center justify-center">
+                <Bot size={15} className="text-purple-300" />
+              </div>
+              <div className="chat-bubble-ai-aurora px-4 py-3 flex items-center gap-2">
+                <div className="typing-dot-aurora" /><div className="typing-dot-aurora" /><div className="typing-dot-aurora" />
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Suggestions */}
+        <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+          {suggestions.map(s => (
+            <button
+              key={s}
+              onClick={() => sendMessage(s)}
+              className="aurora-chip flex-shrink-0"
+              style={{ fontFamily: 'Rajdhani, sans-serif' }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Input */}
+        <div className="glass-aurora mt-3 flex items-center gap-2 p-2">
+          <button
+            onClick={toggleVoice}
+            className={`p-2.5 rounded-lg transition-all flex-shrink-0 ${
+              listening
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+                : 'text-purple-400/70 hover:text-purple-300 hover:bg-purple-500/10'
+            }`}
+          >
+            {listening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+          <input
+            className="flex-1 bg-transparent text-sm text-purple-100 outline-none placeholder-purple-500/50"
+            placeholder={listening ? 'Listening...' : 'Ask JARVIS anything...'}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
+          />
+          <button
+            onClick={() => sendMessage()}
+            disabled={!input.trim()}
+            className="btn-primary-aurora p-2.5 rounded-lg flex-shrink-0 disabled:opacity-40"
+          >
+            <Send size={18} />
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-        {suggestions.map(s => (
-          <button key={s} onClick={() => sendMessage(s)}
-            className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full border border-[rgba(0,212,255,0.2)] text-[#4a6080] hover:text-[#00d4ff] hover:border-[#00d4ff]/40 transition-all"
-            style={{ fontFamily: 'Rajdhani, sans-serif' }}>{s}</button>
-        ))}
-      </div>
+      {/* Aurora glow effects */}
+      <div className="aurora-glow-top" />
+      <div className="aurora-glow-bottom" />
 
-      <div className="glass mt-3 flex items-center gap-2 p-2">
-        <button onClick={toggleVoice}
-          className={`p-2 rounded-lg transition-all flex-shrink-0 ${listening ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' : 'text-[#4a6080] hover:text-[#00d4ff] hover:bg-white/5'}`}>
-          {listening ? <MicOff size={18} /> : <Mic size={18} />}
-        </button>
-        <input className="flex-1 bg-transparent text-sm text-[#c8e0f0] outline-none placeholder-[#4a6080]"
-          placeholder={listening ? 'Listening...' : 'Ask JARVIS anything...'}
-          value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} />
-        <button onClick={() => sendMessage()} disabled={!input.trim()} className="btn-primary p-2 rounded-lg flex-shrink-0 disabled:opacity-40">
-          <Send size={18} />
-        </button>
-      </div>
+      {/* CSS animations */}
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes audioBar {
+          0%, 100% { transform: scaleY(0.5); }
+          50% { transform: scaleY(1); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }

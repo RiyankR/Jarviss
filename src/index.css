@@ -466,3 +466,250 @@ select.input-jarvis option {
   from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Aurora/Purple Theme Styles */
+.section-title-aurora {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  color: #c4b5fd;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(168, 85, 247, 0.5), 0 0 30px rgba(139, 92, 246, 0.3);
+  position: relative;
+  display: inline-block;
+}
+
+.section-title-aurora::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #a855f7, #7c3aed, #6366f1, transparent);
+  border-radius: 1px;
+}
+
+.glass-aurora {
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.15), rgba(67, 56, 202, 0.1));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-aurora::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), rgba(139, 92, 246, 0.3), transparent);
+}
+
+.btn-ghost-aurora {
+  background: transparent;
+  color: #c4b5fd;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-ghost-aurora:hover {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.btn-primary-aurora {
+  background: linear-gradient(135deg, #7c3aed, #a855f7, #6366f1);
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary-aurora::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary-aurora:hover::before {
+  left: 100%;
+}
+
+.btn-primary-aurora:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 50px rgba(168, 85, 247, 0.3);
+  transform: translateY(-1px);
+}
+
+.aurora-orb {
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.3), rgba(88, 28, 135, 0.2));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.aurora-ring {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.aurora-avatar {
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.25), rgba(88, 28, 135, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+}
+
+.aurora-avatar-user {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(139, 92, 246, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+.chat-bubble-user-aurora {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(139, 92, 246, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 14px 14px 4px 14px;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.chat-bubble-ai-aurora {
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.2), rgba(67, 56, 202, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 14px 14px 14px 4px;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+}
+
+.typing-dot-aurora {
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  border-radius: 50%;
+  animation: typingBounceAurora 1.2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.typing-dot-aurora:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot-aurora:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounceAurora {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+  }
+}
+
+.aurora-chip {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.aurora-chip:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #c4b5fd;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.aurora-glow-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: 150px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.2), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraGlowTop 4s ease-in-out infinite alternate;
+}
+
+.aurora-glow-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: 100px;
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.15), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  animation: auroraGlowBottom 3s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes auroraGlowTop {
+  0% {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.05);
+    filter: hue-rotate(30deg);
+  }
+}
+
+@keyframes auroraGlowBottom {
+  0% {
+    opacity: 0.4;
+    transform: translateX(-50%) scaleX(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scaleX(1.1);
+    filter: hue-rotate(-20deg);
+  }
+}
+
+/* Scrollbar for aurora theme */
+.glass-aurora::-webkit-scrollbar {
+  width: 6px;
+}
+
+.glass-aurora::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.glass-aurora::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 3px;
+}
+
+.glass-aurora::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
