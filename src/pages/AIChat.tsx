@@ -93,8 +93,6 @@ export default function AIChat() {
   useEffect(() => {
     const canvas = matrixCanvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
@@ -105,7 +103,7 @@ export default function AIChat() {
         y: Math.random() * canvas.height,
         speed: 2 + Math.random() * 4,
         chars: Array.from({ length: 20 }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]),
-        opacity: 0.1 + Math.random() * 0.3,
+        opacity: 0.08 + Math.random() * 0.2,
       }));
     };
 
@@ -121,7 +119,7 @@ export default function AIChat() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = 'rgba(5, 5, 15, 0.1)';
+    ctx.fillStyle = 'rgba(5, 5, 15, 0.08)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.font = '14px "JetBrains Mono", monospace';
@@ -140,7 +138,6 @@ export default function AIChat() {
         col.chars = col.chars.map(() => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]);
       }
 
-      // Randomly change characters
       if (Math.random() < 0.02) {
         const idx = Math.floor(Math.random() * col.chars.length);
         col.chars[idx] = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
@@ -152,18 +149,18 @@ export default function AIChat() {
 
   // Particle system
   const createParticle = useCallback((x: number, y: number): Particle => {
-    const hue = 260 + Math.random() * 60; // Purple range: 260-320
+    const hue = 260 + Math.random() * 50;
     return {
       id: particleIdRef.current++,
       x,
       y,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2 - 1,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5 - 0.8,
       size: 2 + Math.random() * 4,
-      opacity: 0.4 + Math.random() * 0.5,
+      opacity: 0.3 + Math.random() * 0.4,
       hue,
       life: 0,
-      maxLife: 100 + Math.random() * 150,
+      maxLife: 80 + Math.random() * 120,
     };
   }, []);
 
@@ -175,10 +172,9 @@ export default function AIChat() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Add new particles from edges (aurora effect)
-    if (particlesRef.current.length < 80 && Math.random() < 0.3) {
+    if (particlesRef.current.length < 60 && Math.random() < 0.25) {
       const edge = Math.random();
-      let x = 0, y = 0;
+      let x, y;
       if (edge < 0.5) {
         x = Math.random() * canvas.width;
         y = 0;
@@ -189,19 +185,16 @@ export default function AIChat() {
       particlesRef.current.push(createParticle(x, y));
     }
 
-    // Update and draw particles
     particlesRef.current = particlesRef.current.filter(p => {
       p.life++;
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.01; // Gentle upward drift
-      p.opacity = 0.4 * (1 - p.life / p.maxLife);
+      p.vy += 0.008;
+      p.opacity = 0.35 * (1 - p.life / p.maxLife);
 
-      // Wrap around
       if (p.x > canvas.width) p.x = 0;
       if (p.y > canvas.height) p.y = 0;
 
-      // Draw with glow
       const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
       gradient.addColorStop(0, `hsla(${p.hue}, 100%, 70%, ${p.opacity})`);
       gradient.addColorStop(0.5, `hsla(${p.hue}, 100%, 50%, ${p.opacity * 0.5})`);
@@ -212,7 +205,6 @@ export default function AIChat() {
       ctx.fillStyle = gradient;
       ctx.fill();
 
-      // Core
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
       ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, ${p.opacity})`;
@@ -224,16 +216,12 @@ export default function AIChat() {
     requestAnimationFrame(animateParticles);
   }, [createParticle]);
 
-  // Start animations
   useEffect(() => {
     animateMatrix();
     animateParticles();
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-    };
+    return () => cancelAnimationFrame(animationRef.current);
   }, [animateMatrix, animateParticles]);
 
-  // Resize particle canvas
   useEffect(() => {
     const canvas = particleCanvasRef.current;
     if (!canvas) return;
@@ -280,29 +268,20 @@ export default function AIChat() {
   return (
     <div className="relative max-w-4xl mx-auto flex flex-col h-[calc(100vh-140px)] overflow-hidden">
       {/* Matrix rain canvas */}
-      <canvas
-        ref={matrixCanvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-30"
-        style={{ zIndex: 0 }}
-      />
+      <canvas ref={matrixCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none opacity-30" style={{ zIndex: 0 }} />
 
-      {/* Aurora particle canvas */}
-      <canvas
-        ref={particleCanvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 0 }}
-      />
+      {/* Particle canvas */}
+      <canvas ref={particleCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }} />
 
-      {/* Aurora gradient overlays */}
+      {/* Aurora overlays */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           zIndex: 0,
           background: `
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139, 92, 246, 0.15), transparent),
-            radial-gradient(ellipse 60% 40% at 0% 50%, rgba(168, 85, 247, 0.12), transparent),
-            radial-gradient(ellipse 70% 50% at 100% 80%, rgba(192, 132, 252, 0.1), transparent),
-            radial-gradient(ellipse 40% 30% at 50% 100%, rgba(124, 58, 237, 0.15), transparent)
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139, 92, 246, 0.12), transparent),
+            radial-gradient(ellipse 60% 40% at 0% 50%, rgba(168, 85, 247, 0.1), transparent),
+            radial-gradient(ellipse 70% 50% at 100% 80%, rgba(192, 132, 252, 0.08), transparent)
           `,
         }}
       />
@@ -310,28 +289,29 @@ export default function AIChat() {
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center justify-between mb-4">
-          <div className="section-title-aurora flex items-center gap-2">
+          <div className="section-title flex items-center gap-2">
             <Sparkles size={20} className="text-purple-400 animate-pulse" />
             AI Assistant
           </div>
-          <button onClick={() => setMessages([INIT])} className="btn-ghost-aurora text-sm flex items-center gap-2">
+          <button onClick={() => setMessages([INIT])} className="btn-ghost text-sm flex items-center gap-2">
             <RotateCcw size={14} />Clear
           </button>
         </div>
 
-        {/* AI Status Header */}
-        <div className="glass-aurora p-4 mb-4 flex items-center gap-4">
-          <div className="aurora-orb w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 relative">
-            <div className="absolute inset-0 rounded-full animate-spin-slow" style={{
-              background: 'conic-gradient(from 0deg, transparent, rgba(168, 85, 247, 0.5), rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.5), transparent)'
+        {/* AI Status */}
+        <div className="glass p-4 mb-4 flex items-center gap-4">
+          <div className="relative w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="absolute inset-0 rounded-full animate-spin" style={{
+              background: 'conic-gradient(from 0deg, transparent, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 0.6), rgba(124, 58, 237, 0.4), transparent)',
+              animationDuration: '3s'
             }} />
             <div className="absolute inset-1 rounded-full bg-gradient-to-br from-purple-900/80 to-indigo-900/80" />
             <Bot size={24} className="relative text-purple-300" />
-            <div className="aurora-ring absolute inset-[-4px] rounded-full border border-purple-500/30 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-[-4px] rounded-full border border-purple-500/30 animate-ping" style={{ animationDuration: '2s' }} />
           </div>
           <div>
             <div className="font-bold text-purple-300 tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>JARVIS</div>
-            <div className="text-xs text-purple-400/70">Just A Rather Very Intelligent Study System</div>
+            <div className="text-xs text-purple-500/70">Just A Rather Very Intelligent Study System</div>
             <div className="flex items-center gap-2 mt-1">
               <div className="flex gap-0.5">
                 {[...Array(3)].map((_, i) => (
@@ -339,14 +319,14 @@ export default function AIChat() {
                     key={i}
                     className="w-1 h-3 rounded-full"
                     style={{
-                      background: `linear-gradient(to top, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.8))`,
+                      background: 'linear-gradient(to top, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.8))',
                       animation: 'audioBar 0.5s ease-in-out infinite',
                       animationDelay: `${i * 0.1}s`,
                     }}
                   />
                 ))}
               </div>
-              <span className="text-[10px] text-purple-400/60 uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Neural Active</span>
+              <span className="text-[10px] text-purple-500/60 uppercase tracking-widest" style={{ fontFamily: 'Rajdhani, sans-serif' }}>Neural Active</span>
             </div>
           </div>
           <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -356,34 +336,34 @@ export default function AIChat() {
         </div>
 
         {/* Messages */}
-        <div className="glass-aurora flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="glass flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map(msg => (
             <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'assistant' && (
-                <div className="aurora-avatar w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <Bot size={15} className="text-purple-300" />
+                <div className="w-8 h-8 rounded-full border border-purple-500/40 flex items-center justify-center flex-shrink-0 mt-1 bg-purple-500/10">
+                  <Bot size={15} className="text-purple-400" />
                 </div>
               )}
-              <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'chat-bubble-user-aurora' : 'chat-bubble-ai-aurora'}`}>
+              <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
                 <p className="text-purple-100">{msg.content}</p>
-                <div className="text-[10px] text-purple-400/50 mt-1.5">
+                <div className="text-[10px] text-purple-500/50 mt-1.5">
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
               {msg.role === 'user' && (
-                <div className="aurora-avatar-user w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <User size={15} className="text-purple-200" />
+                <div className="w-8 h-8 rounded-full border border-purple-400/30 flex items-center justify-center flex-shrink-0 mt-1 bg-purple-400/20">
+                  <User size={15} className="text-purple-300" />
                 </div>
               )}
             </div>
           ))}
           {typing && (
             <div className="flex gap-3">
-              <div className="aurora-avatar w-8 h-8 rounded-full flex items-center justify-center">
-                <Bot size={15} className="text-purple-300" />
+              <div className="w-8 h-8 rounded-full border border-purple-500/40 flex items-center justify-center bg-purple-500/10">
+                <Bot size={15} className="text-purple-400" />
               </div>
-              <div className="chat-bubble-ai-aurora px-4 py-3 flex items-center gap-2">
-                <div className="typing-dot-aurora" /><div className="typing-dot-aurora" /><div className="typing-dot-aurora" />
+              <div className="chat-bubble-ai px-4 py-3 flex items-center gap-2">
+                <div className="typing-dot" /><div className="typing-dot" /><div className="typing-dot" />
               </div>
             </div>
           )}
@@ -393,25 +373,20 @@ export default function AIChat() {
         {/* Suggestions */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
           {suggestions.map(s => (
-            <button
-              key={s}
-              onClick={() => sendMessage(s)}
-              className="aurora-chip flex-shrink-0"
-              style={{ fontFamily: 'Rajdhani, sans-serif' }}
-            >
+            <button key={s} onClick={() => sendMessage(s)} className="tag cursor-pointer hover:bg-purple-500/20">
               {s}
             </button>
           ))}
         </div>
 
         {/* Input */}
-        <div className="glass-aurora mt-3 flex items-center gap-2 p-2">
+        <div className="glass mt-3 flex items-center gap-2 p-2">
           <button
             onClick={toggleVoice}
             className={`p-2.5 rounded-lg transition-all flex-shrink-0 ${
               listening
-                ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
-                : 'text-purple-400/70 hover:text-purple-300 hover:bg-purple-500/10'
+                ? 'bg-pink-500/20 text-pink-400 border border-pink-500/40 animate-pulse'
+                : 'text-purple-500/70 hover:text-purple-300 hover:bg-purple-500/10'
             }`}
           >
             {listening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -423,32 +398,16 @@ export default function AIChat() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
           />
-          <button
-            onClick={() => sendMessage()}
-            disabled={!input.trim()}
-            className="btn-primary-aurora p-2.5 rounded-lg flex-shrink-0 disabled:opacity-40"
-          >
+          <button onClick={() => sendMessage()} disabled={!input.trim()} className="btn-primary p-2.5 rounded-lg flex-shrink-0 disabled:opacity-40">
             <Send size={18} />
           </button>
         </div>
       </div>
 
-      {/* Aurora glow effects */}
-      <div className="aurora-glow-top" />
-      <div className="aurora-glow-bottom" />
-
-      {/* CSS animations */}
       <style>{`
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
         @keyframes audioBar {
           0%, 100% { transform: scaleY(0.5); }
           50% { transform: scaleY(1); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
         }
       `}</style>
     </div>

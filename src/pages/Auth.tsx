@@ -1,9 +1,18 @@
-import { useState } from 'react';
-import { Zap, Mail, Lock, Eye, EyeOff, UserPlus, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, Mail, Lock, Eye, EyeOff, UserPlus, LogIn } from 'lucide-react';
 import { signUp, signIn, signInWithGoogle } from '../lib/supabase';
 
 interface Props {
   onAuth: () => void;
+}
+
+interface AuroraParticle {
+  id: number;
+  x: number;
+  size: number;
+  duration: number;
+  delay: number;
+  hue: number;
 }
 
 export default function Auth({ onAuth }: Props) {
@@ -14,6 +23,20 @@ export default function Auth({ onAuth }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [particles, setParticles] = useState<AuroraParticle[]>([]);
+
+  // Generate aurora particles
+  useEffect(() => {
+    const newParticles: AuroraParticle[] = Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      size: 2 + Math.random() * 5,
+      duration: 12 + Math.random() * 20,
+      delay: Math.random() * 15,
+      hue: 260 + Math.random() * 50,
+    }));
+    setParticles(newParticles);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,26 +92,75 @@ export default function Auth({ onAuth }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] bg-grid flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-grid flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Aurora background */}
+      <div className="aurora-bg" />
+
+      {/* Gradient mesh */}
+      <div className="gradient-mesh" />
+
+      {/* Aurora particles */}
+      {particles.map(p => (
+        <div
+          key={p.id}
+          className="aurora-particle"
+          style={{
+            left: `${p.x}%`,
+            width: p.size,
+            height: p.size,
+            background: `radial-gradient(circle, hsla(${p.hue}, 100%, 70%, 0.5), transparent)`,
+            boxShadow: `0 0 ${p.size * 2}px hsla(${p.hue}, 100%, 60%, 0.3)`,
+            animationDuration: `${p.duration}s`,
+            animationDelay: `${p.delay}s`,
+          }}
+        />
+      ))}
+
+      {/* Large floating orbs */}
+      <div
+        className="fixed w-[600px] h-[600px] rounded-full pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 60%)',
+          top: '-200px',
+          right: '-150px',
+          animation: 'auroraOrb1 25s ease-in-out infinite',
+        }}
+      />
+      <div
+        className="fixed w-[500px] h-[500px] rounded-full pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 60%)',
+          bottom: '-100px',
+          left: '-100px',
+          animation: 'auroraOrb2 30s ease-in-out infinite reverse',
+        }}
+      />
+
+      {/* Content */}
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#00d4ff] mb-4 relative">
-            <Zap size={28} className="text-[#00d4ff]" />
-            <div className="absolute inset-0 rounded-full border border-[#00d4ff]/30 scale-125 animate-pulse" />
+          <div className="inline-flex items-center justify-center w-18 h-18 rounded-full border-2 border-purple-400 mb-4 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/40 to-indigo-600/40 animate-pulse" />
+            <Sparkles size={30} className="relative text-purple-300" />
+            <div className="absolute inset-0 rounded-full border border-purple-400/20 scale-125 animate-pulse" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-[-6px] rounded-full border border-purple-500/10 scale-150" />
           </div>
-          <h1 className="text-3xl font-bold text-[#00d4ff] tracking-[0.2em] uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <h1 className="text-3xl font-bold text-purple-300 tracking-[0.2em] uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             JARVIS
           </h1>
-          <p className="text-sm text-[#4a6080] mt-2 tracking-wider uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+          <p className="text-sm text-purple-500/70 mt-2 tracking-wider uppercase" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
             Student OS
           </p>
         </div>
 
-        <div className="glass p-8">
-          <div className="flex mb-6">
+        <div className="glass p-8 relative overflow-hidden">
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent animate-shimmer pointer-events-none" />
+
+          <div className="flex mb-6 relative">
             <button
               onClick={() => { setIsLogin(true); setError(''); }}
-              className={`flex-1 py-2 text-sm font-bold uppercase tracking-wider border-b-2 transition-all ${isLogin ? 'text-[#00d4ff] border-[#00d4ff]' : 'text-[#4a6080] border-transparent hover:text-[#c8e0f0]'}`}
+              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider border-b-2 transition-all ${isLogin ? 'text-purple-300 border-purple-400' : 'text-purple-500/70 border-transparent hover:text-purple-300'}`}
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               <LogIn size={14} className="inline mr-2" />
@@ -96,7 +168,7 @@ export default function Auth({ onAuth }: Props) {
             </button>
             <button
               onClick={() => { setIsLogin(false); setError(''); }}
-              className={`flex-1 py-2 text-sm font-bold uppercase tracking-wider border-b-2 transition-all ${!isLogin ? 'text-[#00d4ff] border-[#00d4ff]' : 'text-[#4a6080] border-transparent hover:text-[#c8e0f0]'}`}
+              className={`flex-1 py-2.5 text-sm font-bold uppercase tracking-wider border-b-2 transition-all ${!isLogin ? 'text-purple-300 border-purple-400' : 'text-purple-500/70 border-transparent hover:text-purple-300'}`}
               style={{ fontFamily: 'Rajdhani, sans-serif' }}
             >
               <UserPlus size={14} className="inline mr-2" />
@@ -104,11 +176,11 @@ export default function Auth({ onAuth }: Props) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 relative">
             <div>
               <label className="label block mb-2">Email</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a6080]" />
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500/70" />
                 <input
                   type="email"
                   className="input-jarvis pl-10"
@@ -124,7 +196,7 @@ export default function Auth({ onAuth }: Props) {
             <div>
               <label className="label block mb-2">Password</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a6080]" />
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500/70" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   className="input-jarvis pl-10 pr-10"
@@ -136,7 +208,7 @@ export default function Auth({ onAuth }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(s => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4a6080] hover:text-[#00d4ff]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-500/70 hover:text-purple-300"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -148,7 +220,7 @@ export default function Auth({ onAuth }: Props) {
               <div>
                 <label className="label block mb-2">Confirm Password</label>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a6080]" />
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500/70" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     className="input-jarvis pl-10"
@@ -162,7 +234,7 @@ export default function Auth({ onAuth }: Props) {
             )}
 
             {error && (
-              <div className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg p-3">
+              <div className="text-pink-400 text-sm bg-pink-400/10 border border-pink-400/20 rounded-lg p-3">
                 {error}
               </div>
             )}
@@ -188,10 +260,10 @@ export default function Auth({ onAuth }: Props) {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
+              <div className="w-full border-t border-purple-500/20" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-[rgba(0,20,50,0.55)] px-3 text-[#4a6080] uppercase tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
+              <span className="bg-[rgba(88,28,135,0.3)] px-4 text-purple-500/80 uppercase tracking-wider" style={{ fontFamily: 'Rajdhani, sans-serif' }}>
                 or continue with
               </span>
             </div>
@@ -210,7 +282,7 @@ export default function Auth({ onAuth }: Props) {
               }
             }}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white text-gray-800 font-semibold hover:bg-gray-100 transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-semibold hover:bg-gray-100 hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all disabled:opacity-50"
             style={{ fontFamily: 'Rajdhani, sans-serif' }}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -222,21 +294,33 @@ export default function Auth({ onAuth }: Props) {
             Continue with Google
           </button>
 
-          <p className="text-xs text-[#4a6080] text-center mt-6">
+          <p className="text-xs text-purple-500/70 text-center mt-6">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <button
               onClick={() => { setIsLogin(!isLogin); setError(''); }}
-              className="text-[#00d4ff] hover:underline"
+              className="text-purple-300 hover:underline"
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
           </p>
         </div>
 
-        <p className="text-xs text-[#4a6080] text-center mt-6">
+        <p className="text-xs text-purple-500/50 text-center mt-6">
           Your data is securely stored and encrypted. Only you can access your notes and schedule.
         </p>
       </div>
+
+      {/* Orb animations */}
+      <style>{`
+        @keyframes auroraOrb1 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+          50% { transform: translate(-40px, 50px) scale(1.1); opacity: 1; }
+        }
+        @keyframes auroraOrb2 {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+          50% { transform: translate(50px, -30px) scale(1.15); opacity: 0.9; }
+        }
+      `}</style>
     </div>
   );
 }
